@@ -1,15 +1,15 @@
 "use client";
 
-import { useMemo, useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import format from "date-fns/format";
+import { Conversation, Message, User } from "@prisma/client";
+import { format } from "date-fns";
 import { useSession } from "next-auth/react";
 import clsx from "clsx";
 
-import { Conversation, Message, User } from "@prisma/client";
-import { FullConversationType } from "@/app/types";
-import useOtherUser from "@/app/hooks/useOtherUser";
 import Avatar from "@/app/components/Avatar";
+import useOtherUser from "@/app/hooks/useOtherUser";
+import { FullConversationType } from "@/app/types";
 
 interface ConversationBoxProps {
   data: FullConversationType;
@@ -49,12 +49,8 @@ const ConversationBox: React.FC<ConversationBoxProps> = ({
       return false;
     }
 
-    return (
-      seenArray?.filter((user) => {
-        user?.email === userEmail;
-      }).length !== 0
-    );
-  }, [lastMessage, userEmail]);
+    return seenArray?.filter((user) => user?.email === userEmail)?.length !== 0;
+  }, [userEmail, lastMessage]);
 
   const lastMessageText = useMemo(() => {
     if (lastMessage?.image) {
@@ -80,19 +76,29 @@ const ConversationBox: React.FC<ConversationBoxProps> = ({
       <Avatar user={otherUser} />
       <div className="min-w-0 flex-1">
         <div className="focus:outline-none">
+          <span className="absolute inset-0" aria-hidden="true" />
           <div className="flex justify-between items-center mb-1">
             <p className="text-md font-medium text-gray-900">
-              {data?.name || otherUser?.name}
+              {data.name || otherUser.name}
             </p>
             {lastMessage?.createdAt && (
-              <p className="text-xs text-gray-400 font-light">
-                {format(new Date(lastMessage?.createdAt), "p")}
+              <p
+                className="
+                  text-xs 
+                  text-gray-400 
+                  font-light
+                "
+              >
+                {format(new Date(lastMessage.createdAt), "p")}
               </p>
             )}
           </div>
           <p
             className={clsx(
-              `truncate text-sm`,
+              `
+              truncate 
+              text-sm
+              `,
               hasSeen ? "text-gray-500" : "text-black font-medium"
             )}
           >
