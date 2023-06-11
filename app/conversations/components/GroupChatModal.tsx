@@ -1,8 +1,14 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { User } from "@prisma/client";
 import { useState } from "react";
+import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
+import { toast } from "react-hot-toast";
+import { useRouter } from "next/navigation";
+import axios from "axios";
+
+import { User } from "@prisma/client";
+
+import Modal from "@/app/components/Modal";
 
 interface GroupChatModalProps {
   isOpen?: boolean;
@@ -15,9 +21,34 @@ const GroupChatModal: React.FC<GroupChatModalProps> = ({
   users,
 }) => {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState();
+  const [isLoading, setIsLoading] = useState(false);
 
-  return <div>GroupChatModal</div>;
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm<FieldValues>({
+    defaultValues: { name: "", members: [] },
+  });
+
+  const members = watch("members");
+
+  const onSubmit: SubmitHandler<FieldValues> = (data) => {
+    setIsLoading(true);
+
+    axios
+      ?.post("/api/conversations", { ...data, isGroup: true })
+      .then(() => {
+        router?.refresh();
+        onClose();
+      })
+      .catch(() => toast?.error("Something went wrong"))
+      .finally(() => setIsLoading(false));
+  };
+
+  return <Modal></Modal>;
 };
 
 export default GroupChatModal;
